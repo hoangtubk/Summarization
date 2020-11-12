@@ -1,5 +1,6 @@
 import json
 import re
+from bs4 import BeautifulSoup
 
 def get_all_team():
     """
@@ -39,8 +40,34 @@ def get_all_line_score_board():
 
     return line_score_board
 
+def get_list_pragraph_tag(tag):
+    """
+    lay list paragraph chứa tag
+    :param tag:
+    :return:
+    """
+    list_paragraph = []
+    with open("../input/train.jsonl", "r", encoding="utf-8") as fr:
+        lines = fr.readlines()
+        for line in lines:
+            data = json.loads(line, encoding="utf-8")
+            for html in data["html_annotation"]:
+                soup = BeautifulSoup(html, "html.parser")
+                events = soup.find_all("span", {"class": "tag"})
+                for e in events:
+                    if tag in e["data"]:
+                        print(e.text)
+                        list_paragraph.append(e.text)
+                    # print("event_type:", e["data"])
+                    # print("event_id:", e["event_id"])
+                    # print("text:", e.text)
+    return list_paragraph
+
 if __name__ == '__main__':
     team = get_all_team()
     line_score_board = get_all_line_score_board()
-    print(len(line_score_board))
-    print(line_score_board)
+    # lay list paragraph chứa tag:
+    list_tag = get_list_pragraph_tag("card_info")
+    print(len(list_tag))
+
+    assert False

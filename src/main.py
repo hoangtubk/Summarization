@@ -46,6 +46,7 @@ def get_list_pragraph_tag(tag):
     :param tag:
     :return:
     """
+    print("Tag: ", tag)
     list_paragraph = []
     with open("../input/train.jsonl", "r", encoding="utf-8") as fr:
         lines = fr.readlines()
@@ -63,11 +64,52 @@ def get_list_pragraph_tag(tag):
                     # print("text:", e.text)
     return list_paragraph
 
+def get_list_time_from_parag(text):
+    """
+    Lấy danh sách thời gian từ câu
+    :param text:
+    :return:
+    """
+    list_time = []
+    time_pattern_1 = "((phút thứ)|phút)\s(\d{1,2})"
+    temp_1 = re.findall(time_pattern_1, text.lower())
+    for time in temp_1:
+        list_time.append(time[2])
+    time_pattern_2 = "(\d{1,2})('|\")"
+    temp_2 = re.findall(time_pattern_2, text.lower())
+    for time in temp_2:
+        list_time.append(time[0])
+
+    return list_time
+
 if __name__ == '__main__':
+    #--------------------------------------
+    # Bắt thẻ đỏ / thẻ vàng:
+    #--------------------------------------
+    with open("../input/train.jsonl", "r", encoding="utf-8") as fr:
+        lines = fr.readlines()
+        for line in lines:
+            data = json.loads(line, encoding="utf-8")
+            for body in data["original_doc"]["_source"]["body"]:
+                text = body["text"]
+                # Bắt pattern chứa thông tin thẻ
+                if re.search("(thẻ đỏ)|(thẻ vàng)", text.lower()) == None:
+                    continue
+                # Bắt pattern chứa thông tin thời gian
+                list_time = get_list_time_from_parag(text)
+                print(list_time)
+                print(text)
+        assert False
+
+    assert False
     team = get_all_team()
     line_score_board = get_all_line_score_board()
     # lay list paragraph chứa tag:
     list_tag = get_list_pragraph_tag("card_info")
+    # list_tag = get_list_pragraph_tag("substitution")
     print(len(list_tag))
 
-    assert False
+    for tag in list_tag:
+        a = re.search("(thẻ đỏ)|(thẻ vàng)|(Thẻ vàng)|(Thẻ đỏ)", tag)
+        if a == None:
+            print(tag)

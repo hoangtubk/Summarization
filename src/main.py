@@ -1,6 +1,7 @@
 import json
 import re
 from bs4 import BeautifulSoup
+import copy
 
 def get_all_team():
     """
@@ -82,10 +83,44 @@ def get_list_time_from_parag(text):
 
     return list_time
 
-if __name__ == '__main__':
-    #--------------------------------------
+def get_list_name_from_parag(text):
+    """
+    Lấy danh sách tên người trong câu
+    :param text:
+    :return:
+    """
+    # Loại bỏ ký tự đặc biệt
+    text = re.sub('[^A-Za-z0-9\s]+', '', text)
+    # Bổ sung dấu cách để bắt từ cuối cùng
+    text = text + " ."
+    text_word = text.split()
+    temp = ""
+    list_name = []
+    for i in range(0, len(text_word)):
+        last_text = text_word[i]
+        if temp != "":
+            list_name.append(temp.strip())
+            temp = ""
+        if len(list_name) != 0 and last_text in list_name[-1]:
+            continue
+        if text_word[i][0].isupper():
+            temp = temp + " " + copy.deepcopy(text_word[i])
+            for j in range(i + 1, len(text_word)):
+                if text_word[j][0].isupper():
+                    temp = temp + " " + copy.deepcopy(text_word[j])
+                    i = j
+                else:
+                    break
+
+    return list_name
+
+def get_card_info():
+    """
+    # --------------------------------------
     # Bắt thẻ đỏ / thẻ vàng:
-    #--------------------------------------
+    # --------------------------------------
+    :return:
+    """
     with open("../input/train.jsonl", "r", encoding="utf-8") as fr:
         lines = fr.readlines()
         for line in lines:
@@ -99,9 +134,13 @@ if __name__ == '__main__':
                 list_time = get_list_time_from_parag(text)
                 print(list_time)
                 print(text)
-        assert False
+                # Lấy danh sách các từ bắt đầu bằng chữ in hoa
+                list_name = get_list_name_from_parag(text)
+                print(list_name)
 
-    assert False
+if __name__ == '__main__':
+
+
     team = get_all_team()
     line_score_board = get_all_line_score_board()
     # lay list paragraph chứa tag:
@@ -109,7 +148,7 @@ if __name__ == '__main__':
     # list_tag = get_list_pragraph_tag("substitution")
     print(len(list_tag))
 
-    for tag in list_tag:
-        a = re.search("(thẻ đỏ)|(thẻ vàng)|(Thẻ vàng)|(Thẻ đỏ)", tag)
-        if a == None:
-            print(tag)
+    # for tag in list_tag:
+    #     a = re.search("(thẻ đỏ)|(thẻ vàng)|(Thẻ vàng)|(Thẻ đỏ)", tag)
+    #     if a == None:
+    #         print(tag)
